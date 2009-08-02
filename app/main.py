@@ -25,10 +25,6 @@ class LingrvantHandler(webapp.RequestHandler):
     self.response.headers['charset'] = 'utf-8'
     self.response.set_status(200)
 
-    if len(msg) == 0:
-      write('OkOk')
-      return
-
     try:
       json = self.request.get("json")
       if len(json) > 0:
@@ -36,6 +32,10 @@ class LingrvantHandler(webapp.RequestHandler):
         msg = param['events'][0]['message']['text']
       else:
         msg = urllib.unquote(msg)
+
+      if len(msg) == 0:
+        return
+
       logging.error("msg: %s" % msg)
 
       for plugin in Plugin.plugins:
