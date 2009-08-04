@@ -89,6 +89,9 @@ p: Patent Search"""
 
     def format(self, results, items):
         """Format output text accordingly."""
+        if len(results) == 0:
+            return 'Your search did not match any documents.'
+
         a = []
         for r in results:
             s = []
