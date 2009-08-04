@@ -19,7 +19,7 @@ def main():
     line = readline()
     while line:
         for plugin in Plugin.plugins:
-            response = plugin.on_message(line)
+            response = plugin.on_message({'text':line})
             if response:
                 print(response)
         line = readline()

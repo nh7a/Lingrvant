@@ -24,7 +24,7 @@ class Plugin:
 
   def on_message(self, msg):
     """Message handler."""
-    return self.dispatch(msg)
+    return self.dispatch(msg['text'])
 
   def dispatch(self, msg):
     """Message dispatcher."""

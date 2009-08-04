@@ -38,11 +38,10 @@ class LingrvantHandler(webapp.RequestHandler):
 
   def on_message(self, message):
     write = self.response.out.write
-    text = message['text']
-    logging.info("text: %s" % text)
+    logging.info("text: %s" % message['text'])
 
     for plugin in Plugin.plugins:
-      response = plugin.on_message(text)
+      response = plugin.on_message(message)
       if response:
         logging.info("response: %s" % response)
         write(response)
