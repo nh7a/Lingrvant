@@ -77,6 +77,6 @@ class Plugin:
       if plugin:
         try:
           exec('from plugins import %s' % plugin.group(1))
-          logging.info('imported plugin: %s' % plugin.group(1))
+          logging.debug('imported plugin: %s' % plugin.group(1))
         except Exception, e:
           logging.error(e)
