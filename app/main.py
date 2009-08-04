@@ -31,7 +31,7 @@ class LingrvantHandler(webapp.RequestHandler):
           self.on_message(event['message'])
       else:
         text = urllib.unquote(self.request.get("text"))
-        self.on_message(text)
+        self.on_message({'text':text})
 
     except Exception, e:
       logging.error(e)
