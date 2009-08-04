@@ -16,40 +16,48 @@ from demjson import decode as decode_json
 
 
 class LingrvantHandler(webapp.RequestHandler):
-  def __init__(self):
-    Plugin.load()
 
-  def get(self, msg):
-    write = self.response.out.write
+  def get(self):
     self.response.headers['Content-Type'] = 'text/plain'
     self.response.headers['charset'] = 'utf-8'
     self.response.set_status(200)
 
     try:
       json = self.request.get("json")
+      logging.debug("json: %s" % json)
       if len(json) > 0:
         param = decode_json(json)
-        msg = param['events'][0]['message']['text']
+        for event in param['events']:
+          self.on_message(event['message'])
       else:
-        msg = urllib.unquote(msg)
-
-      if len(msg) == 0:
-        return
-
-      logging.error("msg: %s" % msg)
-
-      for plugin in Plugin.plugins:
-        response = plugin.on_message(msg)
-        if response:
-          logging.error("response: %s" % response)
-          write(response)
+        text = urllib.unquote(self.request.get("text"))
+        self.on_message(text)
 
     except Exception, e:
       logging.error(e)
 
+  def on_message(self, message):
+    write = self.response.out.write
+    text = message['text']
+    logging.info("text: %s" % text)
+
+    for plugin in Plugin.plugins:
+      response = plugin.on_message(text)
+      if response:
+        logging.info("response: %s" % response)
+        write(response)
+
+
+class LingrvantHomepage(webapp.RequestHandler):
+  def get(self, msg):
+    write = self.response.out.write
+    write("OkOk")
+
 
 def main():
-  application = webapp.WSGIApplication([('/(.*)', LingrvantHandler)],
+  Plugin.load()
+  application = webapp.WSGIApplication([('/handler', LingrvantHandler),
+                                        ('/(.*)', LingrvantHomepage)],
                                        debug=True)
   wsgiref.handlers.CGIHandler().run(application)
 
