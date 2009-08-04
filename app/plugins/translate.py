@@ -12,9 +12,9 @@ class Translate(Plugin):
 
     def help(self):
         """Help"""
-        return """!T mode text...
-mode: langFrom|langTo or |langTo
-supported languages: Albanian, Arabic, Bulgarian, Chinese (Simplified and Traditional), Catalan, Croatian, Czech, Danish, Dutch, English, Estonian, Filipino, Finnish, French, Galician, German, Greek, Hebrew, Hindi, Hungarian, Indonesian, Italian, Japanese, Korean, Latvian, Lithuanian, Maltese, Norwegian, PersianNew!, Polish, Portuguese, Romanian, Russian, Spanish, Serbian, Slovak, Slovenian, Swedish, Thai, Turkish, Ukrainian, Vietnamese"""
+        return """!T from|to text...
+!T |to text...
+Supported languages: Albanian, Arabic, Bulgarian, Chinese (Simplified and Traditional), Catalan, Croatian, Czech, Danish, Dutch, English, Estonian, Filipino, Finnish, French, Galician, German, Greek, Hebrew, Hindi, Hungarian, Indonesian, Italian, Japanese, Korean, Latvian, Lithuanian, Maltese, Norwegian, PersianNew!, Polish, Portuguese, Romanian, Russian, Spanish, Serbian, Slovak, Slovenian, Swedish, Thai, Turkish, Ukrainian, Vietnamese"""
 
     def cmd_T(self, argv):
         """Translate query"""
