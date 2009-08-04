@@ -29,12 +29,23 @@ p: Patent Search"""
     def cmd_Gw(self, argv):
         """Web Search"""
         r = self.query('web', argv)
-        return self.format(r, ('titleNoFormatting', 'content', 'url'))
+        return self.format(r, ('titleNoFormatting', 'content', 'unescapedUrl'))
 
     def cmd_Gl(self, argv):
         """Local Search"""
-        r = self.query('local', argv)
-        return self.format(r, ('titleNoFormatting', 'url'))
+        results = self.query('local', argv)
+        a = []
+        for r in results[:2]:
+            s = []
+            s.append(r['titleNoFormatting'])
+            s.append(','.join(r['addressLines']))
+            s.append(r['phoneNumbers'][0]['number'])
+            s.append(r['staticMapUrl'] + '#.png')
+            s.append(r['url'])
+            a.append('\n'.join(s))
+        s = '\n.\n'.join(a)
+        s = s.replace('<b>', '').replace('</b>', '')
+        return s
 
     def cmd_Gv(self, argv):
         """Book Search"""
@@ -46,27 +57,39 @@ p: Patent Search"""
     def cmd_Gb(self, argv):
         """Book Search"""
         r =  self.query('blogs', argv)
-        return self.format(r, ('titleNoFormatting', 'content', 'postUrl'))
+        return self.format(r[:2], ('titleNoFormatting', 'content', 'postUrl'))
 
     def cmd_Gn(self, argv):
         """News Search"""
         r =  self.query('news', argv)
-        return self.format(r, ('titleNoFormatting', 'content', 'url'))
+        return self.format(r[:2], ('titleNoFormatting', 'content', 'unescapedUrl'))
 
     def cmd_Gk(self, argv):
         """Book Search"""
         r =  self.query('books', argv)
-        return self.format(r, ('titleNoFormatting', 'authors', 'bookId', 'url'))
+        return self.format(r[:2], ('titleNoFormatting', 'authors', 'bookId', 'unescapedUrl'))
 
     def cmd_Gi(self, argv):
         """Images Search"""
         r =  self.query('images', argv)
-        return self.format(r, ('contentNoFormatting', 'url'))
+        return self.format(r, ('contentNoFormatting', 'unescapedUrl'))
 
     def cmd_Gp(self, argv):
         """Patent Search"""
-        r = self.query('patent', argv)
-        return self.format(r, ('titleNoFormatting', 'content', 'url'))
+        results = self.query('patent', argv)
+        a = []
+        for r in results[:2]:
+            s = []
+            s.append(r['titleNoFormatting'])
+            s.append('%s / %s / %s' % (r['patentNumber'], r['patentStatus'], r['applicationDate'] if 'applicationDate' in r else '-'))
+            s.append(r['content'])
+            s.append(r['unescapedUrl'])
+            a.append('\n'.join(s))
+        s = '\n.\n'.join(a)
+        s = s.replace('<b>', '').replace('</b>', '')
+        return s
+
+        return self.format(r[:2], ('titleNoFormatting', 'applicationDate', 'content', 'unescapedUrl'))
 
     def query(self, property, argv):
         """Make a query to Google property."""
