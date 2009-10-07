@@ -5,7 +5,7 @@ import re
 import urllib
 from lingrvant import Plugin
 from demjson import decode as decode_json
-
+from htmlentitydefs import name2codepoint as n2cp
 
 class Google(Plugin):
     """Google search Plugin for Lingrvant"""
@@ -116,14 +116,34 @@ p: Patent Search"""
             return 'Your search did not match any documents.'
 
         a = []
-        for r in results:
+        for r in results[:3]:
             s = []
             for i in items:
                 s.append(r[i])
             a.append('\n'.join(s))
         s = '\n.\n'.join(a)
         s = s.replace('<b>', '').replace('</b>', '')
-        return s
+        return self.decode_htmlentities(s)
+
+    def decode_htmlentities(self, s):
+        """ Written by http://github.com/sku """
+        def substitute_entity(match):
+            ent = match.group(3)
+            if match.group(1) == "#":
+                # decoding by number
+                if match.group(2) == '':
+                    # number is in decimal
+                    return unichr(int(ent))
+                elif match.group(2) == 'x':
+                    # number is in hex
+                    return unichr(int('0x'+ent, 16))
+            else:
+                # they were using a name
+                cp = n2cp.get(ent)
+                if cp: return unichr(cp)
+                else: return match.group()
+        entity_re = re.compile(r'&(#?)(x?)(\w+);')
+        return entity_re.subn(substitute_entity, s)[0]
 
 
 Plugin.register(Google())
