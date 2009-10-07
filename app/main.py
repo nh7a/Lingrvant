@@ -16,6 +16,8 @@ from demjson import decode as decode_json
 
 
 class LingrvantHandler(webapp.RequestHandler):
+  def post(self):
+    self.get()
 
   def get(self):
     self.response.headers['Content-Type'] = 'text/plain'
