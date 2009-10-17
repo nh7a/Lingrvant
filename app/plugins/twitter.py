@@ -34,6 +34,7 @@ t: show trends"""
       url = 'http://twitter.com/users/show/%s.json' % twitterid[0]
       f = urllib.urlopen(url)
       res = decode_json(f.read())
+      logging.debug("twitterscore: %s" % res)
       status = ''
       if res['protected']:
         status = "Protected" 
@@ -44,6 +45,7 @@ t: show trends"""
     except Exception, e:
       logging.info(e)
 
+    logging.debug('trying without API')
     url = 'http://twitter.com/%s' % twitterid[0]
     f = urllib.urlopen(url)
     html = f.read()
@@ -54,7 +56,7 @@ t: show trends"""
     status = self.search('<ol class="statuses" id="timeline">.*?<span class="entry-content">(.*?)</span>', html)
     friends = self.search('<span id="following_count" class="stats_count numeric">([0-9,\. ]+)</span>', html)
     followers = self.search('<span id="follower_count" class="stats_count numeric">([0-9,\. ]+)</span>', html)
-    tweets = self.search('<li id="profile_tab"><a href="/N" accesskey="u" class="in-page-link"><span id="update_count" class="stat_count">([0-9,\. ]+)</span><span>Tweets</span></a></li>', html)
+    tweets = self.search('<li id="profile_tab"><a href="/.*" accesskey="u"><span id="update_count" class="stat_count">([0-9,\. ]+)</span><span>Tweets</span></a></li>', html)
     address = self.search(r'<address>(.*)</address>', html)
     name = self.search(r'<li><span class="label">Name</span>(.*?)</li>', address)
     location = self.search(r'<li><span class="label">Location</span>(.*?)</li>', address)
@@ -97,6 +99,7 @@ t: show trends"""
       return result.group(1)
 
   def twitterscore(self, friends, followers, statuses):
+    logging.debug("twitterscore: %s %s %s" % (friends, followers, statuses))
     score = 'N/A'
     try:
       n1 = int(friends.replace(',','').replace('.',''))
@@ -114,7 +117,10 @@ t: show trends"""
 
   def twu_format(self, image, screen_name, name, location, web, description, status, friends, followers, tweets, verified):
     score = self.twitterscore(friends, followers, tweets)
-    response = "%s %s %s\n" % (image, screen_name, "(Verified Account)" if verified else "")
+    response = "%s %s" % (image, screen_name)
+    if verified:
+      response += " (Verified Account)"
+    response = "\n"
     response += "http://twitter.com/%s\n" % screen_name
     response += "Name: %s\n" % name
     if location and len(location):
