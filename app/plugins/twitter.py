@@ -31,7 +31,7 @@ t: show trends"""
 
   def cmd_twu(self, twitterid):
     try:
-      url = 'http://twitter.com/users/show/%s.json' % twitterid[0]
+      url = 'http://twitter.com/users/show.json?screen_name=%s' % twitterid[0]
       f = urllib.urlopen(url)
       res = decode_json(f.read())
       logging.debug("twitterscore: %s" % res)
