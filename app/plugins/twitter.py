@@ -120,7 +120,7 @@ t: show trends"""
     response = "%s %s" % (image, screen_name)
     if verified:
       response += " (Verified Account)"
-    response = "\n"
+    response += "\n"
     response += "http://twitter.com/%s\n" % screen_name
     response += "Name: %s\n" % name
     if location and len(location):
