@@ -109,10 +109,12 @@ t: show trends"""
       n1 = int(friends)
       n2 = int(followers)
       n3 = int(statuses)
-
-    score = math.log((1 + n2 / n1) * n3)
-    score *= score
-    score = '%.2f' % score
+    try:
+      score = math.log((1 + n2 / n1) * n3)
+      score *= score
+      score = '%.2f' % score
+    except:
+      pass
     return score
 
   def twu_format(self, image, screen_name, name, location, web, description, status, friends, followers, tweets, verified):
