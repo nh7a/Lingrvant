@@ -7,7 +7,7 @@ import math
 from lingrvant import Plugin
 from demjson import decode as decode_json
 import logging
-
+from datetime import datetime
 
 class Twitter(Plugin):
   """Twitter Plugin for Lingrvant"""
@@ -26,7 +26,11 @@ t: show trends"""
     if re.match('^@\w+$', text):
       response = self.cmd_twu([text[1:]])
     else:
-      response = self.dispatch(text)
+      match = re.match('^http://twitter.com/[a-zA-Z0-9_]+/status/([0-9]+)', text)
+      if match:
+        response = self.cmd_tweet([match.group(1)])
+      else:
+        response = self.dispatch(text)
     return response
 
   def cmd_twu(self, twitterid):
@@ -69,9 +73,12 @@ t: show trends"""
       return
     query = ' '.join(query)
     try:
-      url = 'http://search.twitter.com/search.json?rpp=3&q=%s' % self.utf8_str(query)
-      f = urllib.urlopen(url)
+      url = 'http://search.twitter.com/search.json'
+      params = {'rpp': '3', 'q': self.utf8_str(query)}
+      params = urllib.urlencode(params)
+      f = urllib.urlopen(url, params)
       res = decode_json(f.read())
+      logging.info(res)
       response = ''
       for result in res['results']:
         response += '%s %s %s\n' % (result['profile_image_url'], result['from_user'], result['text'])
@@ -88,6 +95,32 @@ t: show trends"""
       response = ''
       for trend in res['trends']:
         response += '%s %s\n' % (trend['name'], trend['url'])
+      return response
+
+    except Exception, e:
+      logging.info(e)
+
+  def cmd_tweet(self, argv):
+    tweetid = argv[0]
+    try:
+      url = 'http://twitter.com/statuses/show/%s.json' % tweetid
+      f = urllib.urlopen(url)
+      res = decode_json(f.read())
+      print res
+      response = ''
+      response = "%s %s\n" % (res['user']['profile_image_url'], res['user']['screen_name'])
+      response += "%s\n" % res['text']
+      response += self.relative_timestamp(res['created_at'])
+      if res['source']:
+        match = re.match('.*>(.+)</a>', res['source'])
+        if match:
+          source = match.group(1)
+        else:
+          source = res['source']
+        response += " from %s" % source
+      if res['in_reply_to_screen_name']:
+        response += " in reply to %s" % res['in_reply_to_screen_name']
+
       return response
 
     except Exception, e:
@@ -140,5 +173,37 @@ t: show trends"""
     re_tag = re.compile('<[a-zA-Z\/][^>]*?>')
     return re_tag.sub('', response).strip()
 
+
+  def relative_timestamp(self, timestamp):
+    created_at = datetime.strptime(timestamp, "%a %b %d %H:%M:%S +0000 %Y")
+    delta = datetime.utcnow() - created_at
+
+    if delta.days == 0:
+      d = delta.seconds
+      if d == 1:
+        return "a second ago"
+      if d < 60:
+        return "%d seconds ago" % d
+  
+      d /= 60
+      if d == 1:
+        return "about a minute ago"
+      if d < 60:
+        return "%d minutes ago" % d
+
+      d /= 60
+      if d == 1:
+        return "about an hour ago"
+      if d < 24:
+        return "%d hours ago" % d
+    else:  
+      d = delta.days
+      if d == 1:
+        return "Yesterday"
+      if d < 7:
+        return "%d days ago" % d
+
+    return "%s" % created_at
+ 
 
 Plugin.register(Twitter())
