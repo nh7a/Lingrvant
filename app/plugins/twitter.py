@@ -26,7 +26,7 @@ t: show trends"""
     if re.match('^@\w+$', text):
       response = self.cmd_twu([text[1:]])
     else:
-      match = re.match('^http://twitter.com/[a-zA-Z0-9_]+/status/([0-9]+)', text)
+      match = re.match('^http://twitter.com/[a-zA-Z0-9_]+/status(?:es)/([0-9]+)', text)
       if match:
         response = self.cmd_tweet([match.group(1)])
       else:
