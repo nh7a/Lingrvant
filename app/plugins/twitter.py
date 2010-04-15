@@ -33,12 +33,28 @@ t: show trends"""
         response = self.dispatch(text)
     return response
 
-  def cmd_twu(self, twitterid):
+  def cmd_twf(self, twitterid):
     try:
-      url = 'http://twitter.com/users/show.json?screen_name=%s' % twitterid[0]
+      url = 'http://api.twitter.com/1/statuses/friends.json?screen_name=%s' % twitterid[0]
       f = urllib.urlopen(url)
       res = decode_json(f.read())
-      logging.debug("twitterscore: %s" % res)
+      logging.debug("twu: %s" % res)
+      if 'error' in res:
+        return res['error']
+      for u in res:
+        print u['screen_name']
+
+    except Exception, e:
+      logging.info(e)
+
+  def cmd_twu(self, twitterid):
+    try:
+      url = 'http://api.twitter.com/1/users/show.json?screen_name=%s' % twitterid[0]
+      f = urllib.urlopen(url)
+      res = decode_json(f.read())
+      logging.debug("twu: %s" % res)
+      if 'error' in res:
+        return res['error']
       status = ''
       if res['protected']:
         status = "Protected" 
@@ -103,10 +119,13 @@ t: show trends"""
   def cmd_tweet(self, argv):
     tweetid = argv[0]
     try:
-      url = 'http://twitter.com/statuses/show/%s.json' % tweetid
+      url = 'http://api.twitter.com/1/statuses/show/%s.json' % tweetid
       f = urllib.urlopen(url)
       res = decode_json(f.read())
       print res
+      if 'error' in res:
+        return res['error']
+
       response = ''
       response = "%s %s\n" % (res['user']['profile_image_url'], res['user']['screen_name'])
       response += "%s\n" % res['text']
@@ -117,7 +136,7 @@ t: show trends"""
           source = match.group(1)
         else:
           source = res['source']
-        response += " from %s" % source
+        response += " via %s" % source
       if res['in_reply_to_screen_name']:
         response += " in reply to %s" % res['in_reply_to_screen_name']
 
@@ -125,6 +144,7 @@ t: show trends"""
 
     except Exception, e:
       logging.info(e)
+      return e
 
   def search(self, regex, text):
     result = re.search(regex, text)
@@ -204,6 +224,6 @@ t: show trends"""
         return "%d days ago" % d
 
     return "%s" % created_at
- 
+
 
 Plugin.register(Twitter())
