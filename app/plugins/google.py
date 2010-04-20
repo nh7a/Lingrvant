@@ -22,6 +22,16 @@ k: Book Search
 i: Image Search
 p: Patent Search"""
 
+    def on_message(self, msg):
+        """Message handler."""
+        text = msg['text']
+
+        if re.match('^http(s?)://\S+\s*$', text):
+            response = self.cmd_Gs([text])
+        else:
+            response = self.dispatch(text)
+        return response
+
     def cmd_G(self, argv):
         """Default (web) Search"""
         return self.cmd_Gw(argv)
@@ -90,6 +100,17 @@ p: Patent Search"""
         return s
 
         return self.format(r[:2], ('titleNoFormatting', 'applicationDate', 'content', 'unescapedUrl'))
+
+    def cmd_Gs(self, argv):
+        """Web Search"""
+        r = self.query('web', argv)
+
+        if len(r) > 0:
+            s = r[0]['titleNoFormatting']
+            s += ' - '
+            s += r[0]['content']
+            s = s.replace('<b>', '').replace('</b>', '')
+            return self.decode_htmlentities(s)
 
     def query(self, property, argv):
         """Make a query to Google property."""
