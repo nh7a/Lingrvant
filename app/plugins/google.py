@@ -26,7 +26,8 @@ p: Patent Search"""
         """Message handler."""
         text = msg['text']
 
-        if re.match('^http(s?)://\S+\s*$', text):
+        if re.match('^ttp(s?)://\S+\s*$', text):
+            text = 'h' + text
             response = self.cmd_Gs([text])
         else:
             response = self.dispatch(text)
