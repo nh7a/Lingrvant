@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (c) 2009 Naoki Hiroshima
 # You can redistribute this and/or modify this under the same terms as Python.
 
