@@ -26,7 +26,7 @@ t: show trends"""
     if re.match('^@\w+$', text):
       response = self.cmd_twu([text[1:]])
     else:
-      match = re.match('^http://twitter.com/[a-zA-Z0-9_]+/status(?:es)?/([0-9]+)', text)
+      match = re.match('^http://twitter.com/(?:#!\/)?[a-zA-Z0-9_]+/status(?:es)?/([0-9]+)', text)
       if match:
         response = self.cmd_tweet([match.group(1)])
       else:
@@ -53,14 +53,13 @@ t: show trends"""
       f = urllib.urlopen(url)
       res = decode_json(f.read())
       logging.debug("twu: %s" % res)
-      if 'error' in res:
-        return res['error']
-      status = ''
-      if res['protected']:
-        status = "Protected" 
-      elif 'status' in res and 'text' in res['status']:
-        status = res['status']['text']
-      return self.twu_format(res['profile_image_url'], res['screen_name'], res['name'], res['location'], res['url'], res['description'], status, res['friends_count'], res['followers_count'], res['statuses_count'], res['verified'])
+      if not 'error' in res:
+        status = ''
+        if res['protected']:
+          status = "Protected" 
+        elif 'status' in res and 'text' in res['status']:
+          status = res['status']['text']
+        return self.twu_format(res['profile_image_url'], res['screen_name'], res['name'], res['location'], res['url'], res['description'], status, res['friends_count'], res['followers_count'], res['statuses_count'], res['verified'])
 
     except Exception, e:
       logging.info(e)
