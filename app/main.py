@@ -25,7 +25,7 @@ class LingrvantHandler(webapp.RequestHandler):
     self.response.set_status(200)
 
     try:
-      json = self.request.get("json")
+      json = self.request.get("json", self.request.body)
       logging.debug("json: %s" % json)
       if len(json) > 0:
         param = decode_json(json)
