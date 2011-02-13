@@ -1,9 +1,12 @@
 # Copyright (c) 2010 Naoki Hiroshima
 # You can redistribute this and/or modify this under the same terms as Python.
 
+import logging
 import re
 import urllib
+import urllib2
 from lingrvant import Plugin
+from demjson import decode as decode_json
 
 
 class Snippet(Plugin):
@@ -13,6 +16,7 @@ class Snippet(Plugin):
         self.re_title = re.compile('<h2>(.*)<\/h2>')
         self.re_img = re.compile('<img src="(http://images.craigslist.org/[\S]*\.jpg)" alt')
         self.re_gmap = re.compile('maps.google.com/\?q=loc%3A(.*)">google map<\/a>')
+        self.re_instagram = re.compile('httpinstagr.am/p/\?q=loc%3A(.*)">google map<\/a>')
 
     def help(self):
         """Show help"""
@@ -24,10 +28,13 @@ class Snippet(Plugin):
 
         match = re.match('^http://[\S]*\.craigslist.org/[\S]*\.html$', text)
         if match:
-            response = self.cmd_craigslist(text)
-        else:
-            response = self.dispatch(text)
-        return response
+            return self.cmd_craigslist(text)
+
+        match = re.match('^http://instagr\.am/p/[\S]*$', text)
+        if match:
+            return self.cmd_instagram(text)
+
+        return self.dispatch(text)
 
     def cmd_craigslist(self, url):
         """!snippet handler"""
@@ -46,5 +53,26 @@ class Snippet(Plugin):
                 result.append(i)
 
         return "\n".join(result)
+
+    def cmd_instagram(self, url):
+        params = 'url=%s' % url
+        instagram = 'http://instagr.am/api/v1/oembed/?%s' % params
+        logging.info('instagram: %s', instagram)
+        f = urllib2.urlopen(instagram)
+        buf = f.read()
+        logging.info('result: %r', buf)
+        res = decode_json(buf)
+        logging.info('decoded: %r', res)
+        return "%s\n%s" % (res['url'], res['title'])
+
+    def cmd_fetch(self, argv):
+        url = '+'.join(argv)
+        if re.match('^http(?s)://', url):
+            logging.info('fetch: %r', url)
+            f = urllib.urlopen(url)
+            buf = f.read()
+            logging.info('result: size: %d', len(buf))
+            logging.debug('result: %r', buf[:512])
+            return '%r' % buf[:512]
 
 Plugin.register(Snippet())
