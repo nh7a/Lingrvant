@@ -24,6 +24,11 @@ class Echo(Plugin):
 250-STARTTLS
 250-PIPELINING
 250 8BITMIME"""
+    elif re.match('^[.0-9\(\)\+\-/\*\s]+\s*=$', text):
+      try:
+        response = str(eval('(%s)' % text[:-1]))
+      except:
+        pass
     else:
       response = self.dispatch(text)
     return response
