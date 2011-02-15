@@ -2,7 +2,7 @@
 # You can redistribute this and/or modify this under the same terms as Python.
 
 import re
-import urllib2
+import urllib, urllib2
 from lingrvant import Plugin
 import config
 from demjson import decode as decode_json
@@ -39,10 +39,11 @@ class Echo(Plugin):
   def cmd_echo(self, argv):
     """!echo handler"""
     if re.match('^@[a-zA-Z]+$', argv[-1]):
-      text = ' '.join(argv[:-1])
-      room = argv[-1][1:]
-      url = 'http://lingr.com/api/room/say?room=%s&bot=%s&text=%s&bot_verifier=%s' % (room, config.bot_id, text, self.bot_verifier)
-
+      params = {'text':' '.join(argv[:-1]).encode('utf-8'),
+                'room':argv[-1][1:],
+                'bot':config.bot_id,
+                'bot_verifier':self.bot_verifier}
+      url = 'http://lingr.com/api/room/say?' + urllib.urlencode(params)
       try:
         f = urllib2.urlopen(url)
         res = decode_json(f.read())
