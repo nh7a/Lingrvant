@@ -16,7 +16,6 @@ class Snippet(Plugin):
         self.re_title = re.compile('<h2>(.*)<\/h2>')
         self.re_img = re.compile('<img src="(http://images.craigslist.org/[\S]*\.jpg)" alt')
         self.re_gmap = re.compile('maps.google.com/\?q=loc%3A(.*)">google map<\/a>')
-        self.re_instagram = re.compile('httpinstagr.am/p/\?q=loc%3A(.*)">google map<\/a>')
 
     def help(self):
         """Show help"""
@@ -55,15 +54,11 @@ class Snippet(Plugin):
         return "\n".join(result)
 
     def cmd_instagram(self, url):
-        params = 'url=%s' % url
-        instagram = 'http://instagr.am/api/v1/oembed/?%s' % params
+        instagram = url + '/media/?size=l'
         logging.info('instagram: %s', instagram)
-        f = urllib2.urlopen(instagram)
-        buf = f.read()
-        logging.info('result: %r', buf)
-        res = decode_json(buf)
-        logging.info('decoded: %r', res)
-        return "%s\n%s" % (res['url'], res['title'])
+        url = urllib2.urlopen(instagram).geturl()
+        logging.info('result: %r', url)
+        return url
 
     def cmd_fetch(self, argv):
         url = '+'.join(argv)
