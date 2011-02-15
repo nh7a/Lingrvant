@@ -2,7 +2,10 @@
 # You can redistribute this and/or modify this under the same terms as Python.
 
 import re
+import urllib2
 from lingrvant import Plugin
+import config
+from demjson import decode as decode_json
 
 
 class Echo(Plugin):
@@ -35,7 +38,23 @@ class Echo(Plugin):
 
   def cmd_echo(self, argv):
     """!echo handler"""
-    return ' '.join(argv)
+    if re.match('^@[a-zA-Z]+$', argv[-1]):
+      text = ' '.join(argv[:-1])
+      room = argv[-1][1:]
+      url = 'http://lingr.com/api/room/say?room=%s&bot=%s&text=%s&bot_verifier=%s' % (room, config.bot_id, text, self.bot_verifier)
 
+      try:
+        f = urllib2.urlopen(url)
+        res = decode_json(f.read())
+        if res['status'] == 'ok':
+          result = 'Posted'
+        else:
+          result = res['detail']
+      except Exception, e:
+        result = str(e)
+    else:
+      result = ' '.join(argv)
+
+    return result
 
 Plugin.register(Echo())

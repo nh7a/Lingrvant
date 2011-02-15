@@ -6,6 +6,8 @@ import os
 import sys
 import re
 import urllib
+import hashlib
+import config
 
 
 class Plugin:
@@ -80,3 +82,9 @@ class Plugin:
           logging.debug('imported plugin: %s' % plugin.group(1))
         except Exception, e:
           logging.error(e)
+
+  @property
+  def bot_verifier(self):
+    if not hasattr(self, "bot_verifier_"):
+      self.bot_verifier_ = hashlib.sha1(config.bot_id + config.bot_secret).hexdigest()
+    return self.bot_verifier_
