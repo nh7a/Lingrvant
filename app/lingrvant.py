@@ -8,11 +8,20 @@ import re
 import urllib
 import hashlib
 import config
+try:
+  from google.appengine.api import memcache as memcache_
+except:
+  sys.path = sys.path + ['/usr/local/google_appengine', '/usr/local/google_appengine/lib/django', '/usr/local/google_appengine/lib/webob', '/usr/local/google_appengine/lib/yaml/lib', '/usr/local/google_appengine/google/appengine','/Users/aral/singularity/']
+  from google.appengine.api import memcache as memcache_
 
 
 class Plugin:
   """Lingr Plugin base class"""
   plugins = []
+
+  @property
+  def memcache(self):
+    return memcache_
 
   def name(self):
     """Show name of plugin"""
