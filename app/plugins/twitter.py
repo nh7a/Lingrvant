@@ -121,7 +121,7 @@ t: show trends"""
       url = 'http://api.twitter.com/1/statuses/show/%s.json' % tweetid
       f = urllib.urlopen(url)
       res = decode_json(f.read())
-      print res
+      logging.debug('json: %r', res)
       if 'error' in res:
         return res['error']
 
