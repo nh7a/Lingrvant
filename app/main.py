@@ -43,10 +43,13 @@ class LingrvantHandler(webapp.RequestHandler):
     logging.info("text: %s" % message['text'])
 
     for plugin in Plugin.plugins:
-      response = plugin.on_message(message)
-      if response:
-        logging.info("response: %s" % response)
-        write(response)
+      try:
+        response = plugin.on_message(message)
+        if response:
+          logging.info("response: %s" % response)
+          write(response)
+      except Exception, e:
+        logging.error('%r: %r', plugin, e)
 
 
 class LingrvantHomepage(webapp.RequestHandler):
