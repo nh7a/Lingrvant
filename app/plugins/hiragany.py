@@ -16,17 +16,21 @@ class Hiragany(Plugin):
 
     def on_message(self, msg):
         """Message handler."""
+        text = msg['text']
+        if text.startswith('http'):
+            return None
+
         key = '%s %s' % (msg['speaker_id'], msg['room'])
-        if msg['text'] == '!h on':
+        if text == '!h on':
             self.memcache.set(key, True, namespace='Hiragany')
             return 'わわわ'
 
         if self.memcache.get(key, namespace='Hiragany'):
-            if msg['text'] == '!h off':
+            if text == '!h off':
                 self.memcache.delete(key, namespace='Hiragany')
                 return 'ゎ'
-            elif msg['text'][0] != '!':
-                return self.convert(msg['text'])
+            elif text[0] != '!':
+                return self.convert(text)
 
     def normalize(self, src):
         arr = []
