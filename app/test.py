@@ -20,7 +20,8 @@ def main():
     line = readline()
     while line:
         for plugin in Plugin.plugins:
-            response = plugin.on_message({'text':line})
+            on_message = getattr(plugin, "on_message")
+            response = plugin.on_message({'text':line, 'speaker_id':1, 'room':'test'})
             if response:
                 print(response)
         line = readline()
