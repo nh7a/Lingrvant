@@ -70,7 +70,7 @@ t: show trends"""
     html = f.read()
     html = html.replace("\n", '')
     screen_name = self.search('<meta content="([^"]+?)" name="page-user-screen_name" />', html)
-    description = self.search('<meta content="([^"]+?)" name="description" />', html)
+    description = self.search('<span class="bio">([^"]+?)</span>', html)
     image = self.search('"profile-image"[^"]+"(http[^"]+?)"', html)
     status = self.search('<ol class="statuses" id="timeline">.*?<span class="entry-content">(.*?)</span>', html)
     friends = self.search('<span id="following_count" class="stats_count numeric">([0-9,\. ]+)</span>', html)
