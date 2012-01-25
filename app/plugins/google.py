@@ -3,6 +3,7 @@
 
 import re
 import urllib
+import logging
 from lingrvant import Plugin
 from demjson import decode as decode_json
 from htmlentitydefs import name2codepoint as n2cp
@@ -40,11 +41,13 @@ p: Patent Search"""
     def cmd_Gw(self, argv):
         """Web Search"""
         r = self.query('web', argv)
+        if isinstance(r, unicode): return r
         return self.format(r, ('titleNoFormatting', 'content', 'unescapedUrl'))
 
     def cmd_Gl(self, argv):
         """Local Search"""
         results = self.query('local', argv)
+        if isinstance(results, unicode): return results
         a = []
         for r in results[:2]:
             s = []
@@ -61,6 +64,7 @@ p: Patent Search"""
     def cmd_Gv(self, argv):
         """Book Search"""
         r = self.query('video', argv)
+        if isinstance(r, unicode): return r
         s = self.format(r, ('titleNoFormatting', 'url'))
         s = urllib.unquote(s).replace('http://www.google.com/url?q=', '')
         return s
@@ -68,26 +72,31 @@ p: Patent Search"""
     def cmd_Gb(self, argv):
         """Book Search"""
         r =  self.query('blogs', argv)
+        if isinstance(r, unicode): return r
         return self.format(r[:2], ('titleNoFormatting', 'content', 'postUrl'))
 
     def cmd_Gn(self, argv):
         """News Search"""
         r =  self.query('news', argv)
+        if isinstance(r, unicode): return r
         return self.format(r[:2], ('titleNoFormatting', 'content', 'unescapedUrl'))
 
     def cmd_Gk(self, argv):
         """Book Search"""
         r =  self.query('books', argv)
+        if isinstance(r, unicode): return r
         return self.format(r[:2], ('titleNoFormatting', 'authors', 'bookId', 'unescapedUrl'))
 
     def cmd_Gi(self, argv):
         """Images Search"""
         r =  self.query('images', argv)
+        if isinstance(r, unicode): return r
         return self.format(r, ('contentNoFormatting', 'unescapedUrl'))
 
     def cmd_Gp(self, argv):
         """Patent Search"""
         results = self.query('patent', argv)
+        if isinstance(results, unicode): return results
         a = []
         for r in results[:2]:
             s = []
@@ -105,6 +114,7 @@ p: Patent Search"""
     def cmd_Gs(self, argv):
         """Web Search"""
         r = self.query('web', argv)
+        if isinstance(r, unicode): return r
 
         if len(r) > 0:
             s = r[0]['titleNoFormatting']
@@ -128,9 +138,17 @@ p: Patent Search"""
 
         url = 'http://ajax.googleapis.com/ajax/services/search/%s?' % property
         params = urllib.urlencode(params)
+        logging.info("GET %s", url + params)
         f = urllib.urlopen(url + params)
         res = decode_json(f.read())
-        return res['responseData']['results']
+        logging.info("results: %r", res)
+
+        if res['responseData'] and res['responseData']['results']:
+            return res['responseData']['results']
+
+        s = '%s: %s' % (res['responseStatus'], res['responseDetails'])
+        logging.error(s)
+        return s
 
     def format(self, results, items):
         """Format output text accordingly."""

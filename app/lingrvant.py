@@ -11,9 +11,7 @@ import config
 try:
   from google.appengine.api import memcache as memcache_
 except:
-  sys.path = sys.path + ['/usr/local/google_appengine', '/usr/local/google_appengine/lib/django', '/usr/local/google_appengine/lib/webob', '/usr/local/google_appengine/lib/yaml/lib', '/usr/local/google_appengine/google/appengine','/Users/aral/singularity/']
-  from google.appengine.api import memcache as memcache_
-
+  pass
 
 class Plugin:
   """Lingr Plugin base class"""
@@ -21,7 +19,14 @@ class Plugin:
 
   @property
   def memcache(self):
-    return memcache_
+    try:
+      return memcache_
+    except:
+      class dummy:
+        def set(self, key, namespace): pass
+        def get(self, key, namespace): return False
+        def delete(self, key, namespace): pass
+      return dummy()
 
   def name(self):
     """Show name of plugin"""
