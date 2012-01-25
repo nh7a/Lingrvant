@@ -8,6 +8,16 @@ from lingrvant import Plugin
 from demjson import decode as decode_json
 import logging
 from datetime import datetime
+from time import time
+from random import getrandbits
+from urllib import urlencode, quote as urlquote
+from hashlib import sha1
+from hmac import new as hmac
+import config
+
+
+def encode(text):
+    return urlquote(str(text), '')
 
 class Twitter(Plugin):
   """Twitter Plugin for Lingrvant"""
@@ -36,6 +46,8 @@ t: show trends"""
   def cmd_twf(self, twitterid):
     try:
       url = 'http://api.twitter.com/1/statuses/friends.json?screen_name=%s' % twitterid[0]
+      url = 'http://api.twitter.com/1/statuses/friends.json'
+      url = self.get_signed_url(url, screen_name=twitterid[0])
       f = urllib.urlopen(url)
       res = decode_json(f.read())
       logging.debug("twu: %s" % res)
@@ -49,11 +61,14 @@ t: show trends"""
 
   def cmd_twu(self, twitterid):
     try:
-      url = 'http://api.twitter.com/1/users/show.json?screen_name=%s' % twitterid[0]
+      url = 'http://api.twitter.com/1/users/show.json'
+      url = self.get_signed_url(url, screen_name=twitterid[0])
       f = urllib.urlopen(url)
       res = decode_json(f.read())
       logging.debug("twu: %s" % res)
-      if not 'error' in res:
+      if 'error' in res:
+        return res['error']
+      else:
         status = ''
         if res['protected']:
           status = "Protected" 
@@ -96,7 +111,7 @@ t: show trends"""
       logging.info(res)
       response = ''
       for result in res['results']:
-        response += '%s %s %s\n' % (result['profile_image_url'], result['from_user'], result['text'])
+        response += '%s?foo.png %s %s\n' % (result['profile_image_url'], result['from_user'], result['text'])
       return response
 
     except Exception, e:
@@ -119,15 +134,26 @@ t: show trends"""
     tweetid = argv[0]
     try:
       url = 'http://api.twitter.com/1/statuses/show/%s.json' % tweetid
+      url = 'http://api.twitter.com/1/statuses/show.json'
+      url = self.get_signed_url(url, id=tweetid, include_entities='true')
+
       f = urllib.urlopen(url)
       res = decode_json(f.read())
       logging.debug('json: %r', res)
       if 'error' in res:
         return res['error']
 
+      media_urls = []
+      text = res['text']
+      try:
+          for media in res['entities']['media']:
+              text = text.replace(media['url'], media['display_url'])
+              media_urls.append(media['media_url'])
+      except:
+          pass
       response = ''
-      response = "%s %s\n" % (res['user']['profile_image_url'], res['user']['screen_name'])
-      response += "%s\n" % res['text']
+      response = "%s?foo.png %s\n" % (res['user']['profile_image_url'], res['user']['screen_name'])
+      response += "%s\n" % text
       response += self.relative_timestamp(res['created_at'])
       if res['source']:
         match = re.match('.*>(.+)</a>', res['source'])
@@ -138,7 +164,8 @@ t: show trends"""
         response += " via %s" % source
       if res['in_reply_to_screen_name']:
         response += " in reply to %s" % res['in_reply_to_screen_name']
-
+      if len(media_urls):
+          response += "\n%s" % "\n".join(media_urls)
       return response
 
     except Exception, e:
@@ -171,7 +198,7 @@ t: show trends"""
 
   def twu_format(self, image, screen_name, name, location, web, description, status, friends, followers, tweets, verified):
     score = self.twitterscore(friends, followers, tweets)
-    response = "%s %s" % (image, screen_name)
+    response = "%s?foo.png %s" % (image, screen_name)
     if verified:
       response += " (Verified Account)"
     response += "\n"
@@ -223,6 +250,33 @@ t: show trends"""
         return "%d days ago" % d
 
     return "%s" % created_at
+
+  def get_signed_url(self, __url, **extra_params):
+    return '%s?%s'%(__url, self.get_signed_body(__url, **extra_params))
+
+  def get_signed_body(self, __url,**extra_params):
+    kwargs = {
+      'oauth_consumer_key': config.twitter_consumer_key,
+      'oauth_signature_method': 'HMAC-SHA1',
+      'oauth_version': '1.0',
+      'oauth_timestamp': int(time()),
+      'oauth_nonce': getrandbits(64),
+      'oauth_token': config.twitter_oauth_token,
+      }
+
+    kwargs.update(extra_params)
+    key = encode(config.twitter_consumer_secret) + '&' + encode(config.twitter_oauth_token_secret)
+    message = '&'.join(map(encode, [
+          'GET', __url, '&'.join(
+            '%s=%s' % (encode(k), encode(kwargs[k])) for k in sorted(kwargs)
+            )
+          ]))
+
+    kwargs['oauth_signature'] = hmac(
+      key, message, sha1
+      ).digest().encode('base64')[:-1]
+
+    return urlencode(kwargs)
 
 
 Plugin.register(Twitter())
