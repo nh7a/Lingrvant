@@ -17,7 +17,7 @@ class Yahoo(Plugin):
     """Message handler."""
     text = msg['text']
 
-    if re.match('^\$\w+$', text):
+    if re.match('^\$[\w=]+$', text):
       response = self.cmd_yf([text[1:]])
     else:
       response = self.dispatch(text)
@@ -38,6 +38,7 @@ class Yahoo(Plugin):
       url = 'http://download.finance.yahoo.com/d/quotes.csv?'
       f = urllib.urlopen(url + params)
       res = f.read().rstrip().split(',')
+      if int(res[2]) == 0: return
       # ['"LNKD"', '"LinkedIn Corporat"', '89.11', '"+12.72 - +16.65%"', '1046.44']
       return {'symbol': res[0].strip('"'),
               'name': res[1].strip('"'),
