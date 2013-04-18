@@ -15,10 +15,13 @@ EOT
     end
 
     def on_message(text, params)
-      if text =~ /^@\w+/
-         cmd_twu([text[1..-1]])
-      else
-        super
+      case text
+        when /^@(\w+)/
+          cmd_twu([$1])
+        when /^https?:\/\/twitter.com\/(?:#!\/)?[a-zA-Z0-9_]+\/status(?:es)?\/([0-9]+)/
+          cmd_tweet([$1])
+        else
+          super
       end
     end
 
@@ -52,6 +55,31 @@ EOT
         r << "Tweets: #{u.statuses_count}"
         r << "TwitterScore: #{twitterscore(u)}"
         r.join("\n")
+      end
+    end
+
+    def cmd_tweet(argv)
+      t = ::Twitter.status(argv[0])
+      if t
+        r = []
+        r << "#{t.profile_image_url()}?foo.png #{t.user.screen_name}\n"
+        r << "#{t.text}\n"
+        r << t.created_at
+        if t.source
+          r << " via "
+          if t.source =~ /.*>(.+)<\/a>/
+            r << $1
+          else
+            r << t.source
+          end
+        end
+        if t.in_reply_to_screen_name
+          r << " in reply to #{t.in_reply_to_screen_name}\n"
+        end
+        t.media.each do |i|
+          r << "#{i.media_url}\n"
+        end
+        r.join('')
       end
     end
   end
