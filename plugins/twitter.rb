@@ -16,7 +16,7 @@ EOT
 
     def on_message(text, params)
       case text
-        when /^@(\w+)/
+        when /^@(\w+)\s*$/
           cmd_twu([$1])
         when /^https?:\/\/twitter.com\/(?:#!\/)?[a-zA-Z0-9_]+\/status(?:es)?\/([0-9]+)/
           cmd_tweet([$1])
