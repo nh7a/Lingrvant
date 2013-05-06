@@ -64,7 +64,7 @@ EOT
         r = []
         r << "#{t.profile_image_url()}?foo.png #{t.user.screen_name}\n"
         r << "#{t.text}\n"
-        r << t.created_at
+        r << t.created_at.getlocal(t.user.utc_offset)
         if t.source
           r << " via "
           if t.source =~ /.*>(.+)<\/a>/
