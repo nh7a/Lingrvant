@@ -1,6 +1,7 @@
 # Yahoo!
 
 require 'net/http'
+require 'CSV'
 
 module Lingrvant
   class Yahoo < Plugin
@@ -29,12 +30,13 @@ module Lingrvant
 
     def get_quotes(symbol)
       response = Net::HTTP.get_response('download.finance.yahoo.com', "/d/quotes.csv?f=snl1crx&s=#{symbol}")
-      res = response.body.split(',')
-      {'symbol' => res[0].gsub(/"/, ''),
-       'name' => res[1].gsub(/"/, ''),
+      res = response.body.chomp
+      res = CSV.parse(res)[0]
+      {'symbol' => res[0],
+       'name' => res[1],
        'last trade' => res[2],
-       'p/e' => res[4],
-       'change' => res[3].gsub(/"/, '').split(' - ')}
+       'change' => res[3].split(' - '),
+       'p/e' => res[4]}
     end
   end
 
