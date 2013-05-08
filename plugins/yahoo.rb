@@ -1,7 +1,7 @@
 # Yahoo!
 
 require 'net/http'
-require 'CSV'
+require 'csv'
 
 module Lingrvant
   class Yahoo < Plugin
