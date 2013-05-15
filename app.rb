@@ -51,7 +51,11 @@ module Lingrvant
       def handle(text, params=nil)
         response = []
         @@plugins.each do |i|
-          response << i.on_message(text, params)
+          begin
+            response << i.on_message(text, params)
+          rescue => e
+            response << "#{e} (#{e.class})"
+          end
         end
         response.compact.join("\n")
       end
