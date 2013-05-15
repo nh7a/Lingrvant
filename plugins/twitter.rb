@@ -50,7 +50,7 @@ EOT
         r << "Location: #{u.location}" if u.location
         r << "Web: #{u.url}" if u.url
         r << "Bio: #{u.description}" if u.description
-        r << "Status: #{u.status.text}" if u.status.text
+        r << "Status: #{u.status.text}" if u.status && u.status.text
         r << "Connection: #{u.friends_count} friends / #{u.followers_count} followers"
         r << "Tweets: #{u.statuses_count}"
         r << "TwitterScore: #{twitterscore(u)}"
