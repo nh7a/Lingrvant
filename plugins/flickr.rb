@@ -25,8 +25,15 @@ EOT
 
     def search(keyword)
       arr = []
-      api = "/services/rest/?method=flickr.photos.search&api_key=#{ENV['FLICKR_API_KEY']}&format=json&text=#{keyword}"
-      response = Net::HTTP.get_response('api.flickr.com', api)
+      params = URI.encode_www_form(
+        method: 'flickr.photos.search',
+        api_key: ENV['FLICKR_API_KEY'],
+        format: 'json',
+        sort: 'relevance',
+        per_page: 10,
+        text: keyword)
+      url = URI("http://api.flickr.com/services/rest?#{params}")
+      response = Net::HTTP.get_response(url)
       json = response.body.sub(/jsonFlickrApi\(/, '').sub(/\);?$/, '')
       photos = JSON.parse(json)['photos']['photo']
     end
