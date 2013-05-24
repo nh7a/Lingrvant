@@ -41,7 +41,7 @@ EOT
     def get_urls(keywords, size, max=10)
       urls = []
       size = size.empty? ? "" : "_#{size}"
-      photos = search(keywords.join('+'))
+      photos = search(keywords.join(' '))
       photos[0..max].each do |i|
         urls << "http://farm#{i['farm']}.staticflickr.com/#{i['server']}/#{i['id']}_#{i['secret']}#{size}.jpg"
       end
