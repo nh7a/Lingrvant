@@ -74,10 +74,10 @@ EOT
           end
         end
         if t.in_reply_to_screen_name
-          r << " in reply to #{t.in_reply_to_screen_name}\n"
+          r << " in reply to #{t.in_reply_to_screen_name}"
         end
         t.media.each do |i|
-          r << "#{i.media_url}\n"
+          r << "\n#{i.media_url}"
         end
         r.join('')
       end
