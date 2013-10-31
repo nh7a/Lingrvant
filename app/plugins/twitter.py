@@ -45,8 +45,8 @@ t: show trends"""
 
   def cmd_twf(self, twitterid):
     try:
-      url = 'http://api.twitter.com/1/statuses/friends.json?screen_name=%s' % twitterid[0]
-      url = 'http://api.twitter.com/1/statuses/friends.json'
+      url = 'http://api.twitter.com/1.1/statuses/friends.json?screen_name=%s' % twitterid[0]
+      url = 'http://api.twitter.com/1.1/statuses/friends.json'
       url = self.get_signed_url(url, screen_name=twitterid[0])
       f = urllib.urlopen(url)
       res = decode_json(f.read())
@@ -61,7 +61,7 @@ t: show trends"""
 
   def cmd_twu(self, twitterid):
     try:
-      url = 'http://api.twitter.com/1/users/show.json'
+      url = 'http://api.twitter.com/1.1/users/show.json'
       url = self.get_signed_url(url, screen_name=twitterid[0])
       f = urllib.urlopen(url)
       res = decode_json(f.read())
@@ -133,8 +133,8 @@ t: show trends"""
   def cmd_tweet(self, argv):
     tweetid = argv[0]
     try:
-      url = 'http://api.twitter.com/1/statuses/show/%s.json' % tweetid
-      url = 'http://api.twitter.com/1/statuses/show.json'
+      url = 'http://api.twitter.com/1.1/statuses/show/%s.json' % tweetid
+      url = 'http://api.twitter.com/1.1/statuses/show.json'
       url = self.get_signed_url(url, id=tweetid, include_entities='true')
 
       f = urllib.urlopen(url)
